@@ -5,6 +5,10 @@ const notifier = require('node-notifier');
 
 let SUBREDDIT = 'bapcsalescanada';
 let INTERVAL = 60000;
+
+if (process.argv.length >= 3) SUBREDDIT = process.argv[2] // Subreddit
+if (process.argv.length >= 4) INTERVAL = process.argv[3] * 1000 // Polling interval (Seconds)
+
 const URL = util.format('https://www.reddit.com/r/%s/new.json', SUBREDDIT);
 
 let lastTimeStamp = new Date(0);
