@@ -5,20 +5,35 @@ const notifier = require('node-notifier');
 
 
 let SUBREDDIT = 'bapcsalescanada';
-let INTERVAL = 60000;
+let INTERVAL = 6000;
+let filter = function (title) { return true };
+let flagOffset = 0;
 
-if (process.argv.length >= 3) SUBREDDIT = process.argv[2] // Subreddit
-if (process.argv.length >= 4) INTERVAL = process.argv[3] * 1000 // Polling interval (Seconds)
+// Set include/exlude filters
+const includeFlag = process.argv.indexOf('-i');
+const excludeFlag = process.argv.indexOf('-e');
+if (includeFlag > -1) {
+    filter = function (title) { return new RegExp(process.argv[includeFlag + 1], 'gi').test(title) }
+    flagOffset += 2;
+} else if (excludeFlag > -1) {
+    filter = function (title) { return !(new RegExp(process.argv[excludeFlag + 1], 'gi').test(title)) }
+    flagOffset += 2;
+}
+
+// Set subbreddit
+if (process.argv.length >= 3 + flagOffset) SUBREDDIT = process.argv[2 + flagOffset];
+// Set polling interval (Seconds)
+if (process.argv.length >= 4 + flagOffset) INTERVAL = process.argv[3 + flagOffset] * 1000;
+
 
 const URL = util.format('https://www.reddit.com/r/%s/new.json', SUBREDDIT);
 
 let lastTimeStamp = new Date(0);
-// const localTZoffset = lastTimeStamp.getTimezoneOffset() / 60;
-
+const localTZoffset = lastTimeStamp.getTimezoneOffset() / 60 + 3; // too lazy to make this part good
 function dateToString(timestamp, useLocal) {
     let dateObj = new Date((timestamp));
     if (useLocal) {
-        dateObj.setHours(dateObj.getHours() - 8);
+        dateObj.setHours(dateObj.getHours() - localTZoffset);
     }
     return dateObj.toLocaleDateString() + ' - ' + dateObj.toLocaleTimeString();
 }
@@ -43,13 +58,14 @@ function pollReddit() {
                 return;
             }
             // On subsequent polls, print out a message for each post newer than the last saved timestamp
+            // and pass the filter
             let count = 0;
             for (let i = 0; i < latestPosts.length; i++) {
                 const post = latestPosts[i];
                 let postTimestamp = post.data.created * 1000;
-                if (postTimestamp > lastTimeStamp) {
+                const postTitle = post.data.title;
+                if (postTimestamp < lastTimeStamp && filter(postTitle)) {
                     count++
-                    const postTitle = post.data.title;
                     const postLink = post.data.url_overridden_by_dest;
                     console.log(util.format('\n[%s]\t%s', dateToString(postTimestamp, true), postTitle));
                     console.log('\t\t\t\t' + postLink);
@@ -60,7 +76,7 @@ function pollReddit() {
                 lastTimeStamp = firstPostTimestamp;
                 notifier.notify(
                     {
-                        title: count + (count === 25 ? '+': '') + ' new posts!',
+                        title: count + (count === 25 ? '+' : '') + ' new posts!',
                         message: firstPost.title,
                         sound: false,
                         wait: true,
