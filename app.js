@@ -64,7 +64,7 @@ function pollReddit() {
                 const post = latestPosts[i];
                 let postTimestamp = post.data.created * 1000;
                 const postTitle = post.data.title;
-                if (postTimestamp < lastTimeStamp && filter(postTitle)) {
+                if (postTimestamp > lastTimeStamp && filter(postTitle)) {
                     count++
                     const postLink = post.data.url_overridden_by_dest;
                     console.log(util.format('\n[%s]\t%s', dateToString(postTimestamp, true), postTitle));
