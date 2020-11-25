@@ -1,6 +1,5 @@
 let util = require('util');
 let https = require('https');
-let opn = require('opn');
 
 const notifier = require('node-notifier');
 
