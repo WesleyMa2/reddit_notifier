@@ -1,0 +1,22 @@
+{
+  "name": "reddit_notifier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WesleyMa2/reddit_notifier.git"
+  },
+  "author": "Wesley Ma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WesleyMa2/reddit_notifier/issues"
+  },
+  "homepage": "https://github.com/WesleyMa2/reddit_notifier#readme",
+  "dependencies": {
+    "node-notifier": "^8.0.0"
+  }
+}

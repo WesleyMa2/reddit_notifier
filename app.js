@@ -1,0 +1,62 @@
+let util = require('util');
+let https = require('https');
+const notifier = require('node-notifier');
+
+
+let SUBREDDIT = 'bapcsalescanada';
+let INTERVAL = 60000;
+const URL = util.format('https://www.reddit.com/r/%s/new.json', SUBREDDIT);
+
+let lastTimeStamp = new Date(0);
+// const localTZoffset = lastTimeStamp.getTimezoneOffset() / 60;
+
+function dateToString(timestamp, useLocal) {
+    let dateObj = new Date((timestamp));
+    if (useLocal) {
+        dateObj.setHours(dateObj.getHours() - 8);
+    }
+    return dateObj.toLocaleDateString() + ' - ' + dateObj.toLocaleTimeString()
+}
+
+function pollReddit() {
+    // console.log('Last post- ' + dateToString(lastTimeStamp, true))
+    https.get(URL, (resp) => {
+        let rawJson = '';
+        let latestPosts = null;
+        // A chunk of data has been recieved.
+        resp.on('data', (chunk) => {
+            rawJson += chunk;
+        });
+        // The whole response has been received.
+        resp.on('end', () => {
+            latestPosts = JSON.parse(rawJson).data.children;
+            const firstPostTimestamp = new Date(latestPosts[0].data.created * 1000);
+            // On first poll, set last timestamp to latest post
+            if (lastTimeStamp.getTime() === 0){
+                lastTimeStamp = firstPostTimestamp;
+                return;
+            }
+            // On subsequent polls, print out a message for each post newer than the last saved timestamp
+            for (let i = 0; i < latestPosts.length; i++) {
+                const post = latestPosts[i];
+                let postTimestamp = post.data.created * 1000;
+                if (postTimestamp > lastTimeStamp) {
+                    const postTitle = post.data.title;
+                    const postLink = post.data.url_overridden_by_dest;
+                    notifier.notify(postTitle);
+                    console.log(util.format('\n[%s]\t%s', dateToString(postTimestamp, true), postTitle));
+                    console.log('\t\t\t\t' + postLink);
+                } else {break;}
+            }
+            
+            if (firstPostTimestamp > lastTimeStamp) lastTimeStamp = firstPostTimestamp;
+        });
+    }).on("error", (err) => {
+        console.log("Error: " + err.message);
+    });
+}
+console.log(util.format('Checking [%s] for new posts every [%i] seconds', SUBREDDIT, INTERVAL / 1000));
+console.log('##########################################################');
+setInterval(pollReddit, INTERVAL,);
+pollReddit()
+
