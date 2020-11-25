@@ -5,7 +5,7 @@ const notifier = require('node-notifier');
 
 
 let SUBREDDIT = 'bapcsalescanada';
-let INTERVAL = 6000;
+let INTERVAL = 60000;
 let filter = function (title) { return true };
 let flagOffset = 0;
 
@@ -72,7 +72,7 @@ function pollReddit() {
                 } else { break; }
             }
             // Update latest timestamp, push notification for latest post
-            if (firstPostTimestamp > lastTimeStamp) {
+            if (count > 0) {
                 lastTimeStamp = firstPostTimestamp;
                 notifier.notify(
                     {
