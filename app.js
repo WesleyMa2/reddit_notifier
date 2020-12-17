@@ -72,8 +72,8 @@ function pollReddit() {
                 const postTitle = post.title;
                 const postLink = post.url_overridden_by_dest;
                 if (filter(postTitle)) {
-                    console.log(util.format('\n[%s]\t%s', dateToString(postTimestamp, true), postTitle));
-                    console.log('\t\t\t\t' + postLink);
+                    console.log(util.format('\n\033[0;32m[%s]\033[0m\t%s', dateToString(postTimestamp, true), postTitle));
+                    console.log('\t\t\t\t\033[1;34m' + postLink);
                 }
             }
 
@@ -96,7 +96,7 @@ function pollReddit() {
         console.log("Error: " + err.message);
     });
 }
-console.log(util.format('Checking r/%s for new posts every %i seconds', SUBREDDIT, INTERVAL / 1000));
+console.log(util.format('Checking r/%s for new posts every %i seconds\033[0m', SUBREDDIT, INTERVAL / 1000));
 if (excludeFlag > -1) console.log('Excluding all posts that match given regex');
 else if (includeFlag > -1) console.log('Including only posts that match given regex');
 console.log('##########################################################');
