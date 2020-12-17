@@ -1,16 +1,13 @@
-let util = require('util');
-let https = require('https');
-
+const util = require('util');
+const https = require('https');
 const notifier = require('node-notifier');
-const { prototype } = require('stream');
-
 
 let SUBREDDIT = 'bapcsalescanada';
 let INTERVAL = 60000;
 let filter = function (title) { return true };
-let argsCount = 2;
 
-// Set include/exlude filters
+// Handle args
+let argsCount = 2;
 const includeFlag = process.argv.indexOf('-i');
 const excludeFlag = process.argv.indexOf('-e');
 const intervalFlag = process.argv.indexOf('-t');
@@ -26,8 +23,6 @@ if (intervalFlag > -1) {
     INTERVAL = process.argv[1 + intervalFlag] * 1000;
     argsCount += 2;
 }
-
-// Set subbreddit;
 if (argsCount > 2 && process.argv.length > argsCount + 1 ||
     process.argv.length > argsCount) SUBREDDIT = process.argv[process.argv.length-1];
 
@@ -63,7 +58,7 @@ function pollReddit() {
             }
             postsArr = JSON.parse(rawJson).data.children;
             const firstPost = postsArr[0] ? postsArr[0].data : null;
-            // On first poll, set last timestamp to latest post
+            // On first poll, update latest post
             if (!latestPost) {
                 latestPost = firstPost.name;
                 url = util.format('https://www.reddit.com/r/%s/new.json?before=%s', SUBREDDIT, latestPost);
@@ -71,7 +66,6 @@ function pollReddit() {
             }
             // On subsequent polls, print out a message for each post newer than the last seen post
             // and passes the filter
-            // console.log(postsArr.length + ' posts since ' + latestPost);
             for (let i = postsArr.length; i > 0; i--) {
                 const post = postsArr[i-1].data;
                 const postTimestamp = post.created * 1000;
@@ -82,7 +76,7 @@ function pollReddit() {
                     console.log('\t\t\t\t' + postLink);
                 }
             }
-            // Update latest timestamp, push notification for latest post
+
             if (postsArr.length > 0) {
                 latestPost = firstPost.name;
                 url = util.format('https://www.reddit.com/r/%s/new.json?before=%s', SUBREDDIT, latestPost);
