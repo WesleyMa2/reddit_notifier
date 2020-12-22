@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/WesleyMa2/reddit_notifier#readme",
   "dependencies": {
-    "node-notifier": "^8.0.0"
+    "node-notifier": "^8.0.1"
   }
 }
